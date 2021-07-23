@@ -1,16 +1,11 @@
 import streamlit as st
-import pickle
-import numpy as np
-import matplotlib.pyplot as plt
-import pandas as pd
-from utility import *
-import plotly.express as px
 
-#st.set_page_config('Explore • BBB Predictor',':brain:')
+from pandas import read_csv
+import plotly.express as px
 
 
 desc_names = list(from_disk('metad.pickle')['desc_names'])
-d = pd.read_csv('data.csv')
+d = read_csv('data.csv')
 def show_explore_page():
     st.markdown("# :mag_right: BBB Dataset Exploration")
 

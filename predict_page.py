@@ -1,13 +1,10 @@
 import streamlit as st
 
-import tensorflow.keras as keras
-import pandas as pd
+from tensorflow.keras.models import load_model
 import numpy as np
 from rdkit.ML.Descriptors.MoleculeDescriptors import MolecularDescriptorCalculator
 from rdkit.Chem import MolFromSmiles
-from utility import *
-
-import sys, os
+from utility import mp, sf, from_disk
 
 metad = from_disk('metad.pickle')
 desc_names, us, ss = metad['desc_names'], metad['us'], metad['ss']
@@ -21,7 +18,7 @@ def desc_from_s(s):
     if np.any(mp(np.isnan, ds)): return None
     return np.array(ds)
 # end
-m = keras.models.load_model('model')
+m = load_model('model')
 def pred_from_desc(desc):
     desc_n = (desc - us) / ss
     return m.predict(np.array([desc_n]))
