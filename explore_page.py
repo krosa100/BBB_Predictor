@@ -2,6 +2,7 @@ import streamlit as st
 
 from pandas import read_csv
 import plotly.express as px
+from utility import from_disk
 
 
 desc_names = list(from_disk('metad.pickle')['desc_names'])

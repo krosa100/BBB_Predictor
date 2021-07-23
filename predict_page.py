@@ -13,7 +13,7 @@ calculator = MolecularDescriptorCalculator(desc_names)
 # repeat code start
 def desc_from_s(s):
     mol = MolFromSmiles(s)
-    if mol == None: return None
+    if mol is None: return None
     ds = calculator.CalcDescriptors(mol)
     if np.any(mp(np.isnan, ds)): return None
     return np.array(ds)
@@ -25,8 +25,8 @@ def pred_from_desc(desc):
 
 def pred_from_s(s):
     desc = desc_from_s(s)
-    if desc == None: return None
-    return pred_from_desc()[0, 1]
+    if desc is None: return None
+    return pred_from_desc(desc)[0, 1]
 
 def show_predict_page():
     st.markdown("# :brain: BBB Permeability Prediction")
@@ -40,7 +40,7 @@ def show_predict_page():
             st.subheader('Error. Please try again.') 
         else:
             pred = pred_from_s(s)
-            if pred == None:
+            if pred is None:
                 st.subheader('Error. Please try again.') 
             else:
                 st.subheader(sf('Probability Permeable: {}', pred))
