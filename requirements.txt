@@ -4,3 +4,4 @@ numpy==1.19.5
 tensorflow-cpu
 rdkit-pypi==2021.03.4
 plotly==5.1.0
+mordred==1.2.0

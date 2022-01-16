@@ -1,32 +1,45 @@
 import streamlit as st
 
-from tensorflow.keras.models import load_model
 import numpy as np
-from rdkit.ML.Descriptors.MoleculeDescriptors import MolecularDescriptorCalculator
-from rdkit.Chem import MolFromSmiles
-from utility import mp, sf, from_disk
+from sklearn.decomposition import KernelPCA
+from rdkit import Chem
+from mordred import Calculator, descriptors
+from tensorflow.keras.models import load_model
+from utility import *
 
-metad = from_disk('metad.pickle')
-desc_names, us, ss = metad['desc_names'], metad['us'], metad['ss']
-calculator = MolecularDescriptorCalculator(desc_names)
+px = from_disk(r'out\model\px')
+m = load_model(r'out\model\m')
 
-# repeat code start
-def desc_from_s(s):
-    mol = MolFromSmiles(s)
-    if mol is None: return None
-    ds = calculator.CalcDescriptors(mol)
-    if np.any(mp(np.isnan, ds)): return None
-    return np.array(ds)
-# end
-m = load_model('model')
-def pred_from_desc(desc):
-    desc_n = (desc - us) / ss
-    return m.predict(np.array([desc_n]))
+calc = Calculator(descriptors, ignore_3D=True)
+def pred(s):
+    '''
+    f = select(lambda i : px['smiles'][i] == s, rlen(px['smiles']))
+    if False:#f != []:
+        return {'type': 'lookup', 'pred': ys[f[0]]}
+    '''
 
-def pred_from_s(s):
-    desc = desc_from_s(s)
-    if desc is None: return None
-    return pred_from_desc(desc)[0, 1]
+    mol = Chem.MolFromSmiles(s)
+    xs = np.array([calc(mol)], dtype=float)
+
+    xs1 = xs[:, px['g_inputs']]
+
+    vs = (1 * np.isnan(xs1))[:, px['a']]
+    xs2 = np.concatenate([xs1, vs], axis=1)
+
+    xs3 = np.where(np.isnan(xs2), px['cm'], xs2) 
+
+    xs4 = (xs3 - px['m']) / px['s']
+
+    xs5 = px['pca'].transform(xs4)
+    prob = m.predict(xs5)[:,0][0]
+    return {'type': 'pred', 'prob': prob, 'pred': prob > 0.5}
+    r'''
+        try:
+        pass
+    except:
+        return {'type': 'error'}
+    '''
+
 
 def show_predict_page():
     st.markdown("# :brain: BBB Permeability Prediction")
@@ -39,9 +52,9 @@ def show_predict_page():
         if s == '':
             st.subheader('Error. Please try again.') 
         else:
-            pred = pred_from_s(s)
-            if pred is None:
+            pred_ = pred(s)
+            if pred_['type'] == 'error':
                 st.subheader('Error. Please try again.') 
             else:
-                st.subheader(sf('Probability Permeable: {}', pred))
+                st.subheader(sf('Probability Permeable: {}', pred_['prob']))
             
