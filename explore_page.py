@@ -1,12 +1,15 @@
 import streamlit as st
 
-from pandas import read_csv
+import pandas as pd
 import plotly.express as px
-from utility import from_disk
 
+from pred_m import px as px2
 
-desc_names = list(from_disk('metad.pickle')['desc_names'])
-d = read_csv('data.csv')
+desc_names = list(px2['descs'])
+d = pd.DataFrame(px2['xs'], columns=px2['descs'])
+d['passes BBB'] = px2['ys']
+d['SMILES'] = px2['smiles']
+
 def show_explore_page():
     st.markdown("# :mag_right: BBB Dataset Exploration")
 
